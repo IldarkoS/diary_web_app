@@ -12,3 +12,15 @@ APP_SECRET_KEY = str(os.getenv('APP_SECRET_KEY'))
 
 
 PSQLURL = f"postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}/{DATABASE_NAME}"
+
+
+# class Config:
+#     DEBUG = False
+#     Testing = False
+#     SECRET_KEY = str(os.getenv('APP_SECRET_KEY'))
+#     SQLALCHEMY_DATABASE_URI = DATABASE_URI
+#     SQLALCHEMY_TRACK_MODIFICATIONS = False
+#     BCRYPT_LOG_ROUNDS = 13
+#     WTF_CSRF_ENABLED = True
+#     DEBUG_TB_ENABLED = False
+#     DEBUG_TB_INTERCEPT_REDIRECTS = False
