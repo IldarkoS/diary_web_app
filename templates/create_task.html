@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Creating task</title>
+    <style>
+      h1 {
+        color: green;
+      }
+    </style>
+  </head>
+  <body>
+    {% if current_user.is_authenticated %}
+	<a href="/logout">Logout</a>
+	{% endif %}
+    <form action="" method="post">
+        {{ form.csrf_token }}
+        <p>
+            {{ form.title.label() }}
+            {{ form.title() }}
+            {% if form.title.errors %}
+            {% for error in form.title.errors %}
+                {{ error }}
+            {% endfor %}
+            {% endif %}
+        </p>
+        <p>
+            {{ form.description.label() }}
+            {{ form.description() }}
+            {% if form.description.errors %}
+            {% for error in form.description.errors %}
+                {{ error }}
+            {% endfor %}
+            {% endif %}
+        </p>
+        <p>
+            {{ form.submit() }}
+        </p>
+        </form>
+        
+  </body>
+</html>
