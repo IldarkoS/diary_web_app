@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task List</title>
+</head>
+<body>
+    <h1>Task List</h1>
+    <ul>{% if tasks %}
+        {% for task in tasks %}
+            <li>Title: {{ task.title }} <br>
+                Description: {{ task.description }} <br>
+                Completed: {{ task.completed }} <br>
+                Created at: {{ task.created_at }} <br>
+                Expired at: {{ task.expired_at }} <br>
+                <form action="/complete_task/{{ task.id }}">
+                    <input type="submit" value="Complete this task" />
+                </form>
+                <form action="/delete_task/{{ task.id }}" method=post>
+                    <input type="submit" value="Delete this task" />
+                </form>
+            </li>
+        {% endfor %}
+        {% else %}
+        Task list empty!
+        {% endif %}
+    </ul>
+    {% if current_user.is_authenticated %}
+    <a href="/create_task">Create new task</a><br>
+	<a href="/logout">Logout</a>
+	{% endif %}
+</body>
+</html>

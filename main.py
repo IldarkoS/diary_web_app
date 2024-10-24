@@ -1,10 +1,11 @@
 import config
-from flask import Flask, request, render_template, url_for, redirect, flash
+from flask import Flask, request, render_template, url_for, redirect, flash, make_response
 from extensions import db
 from database.DAL import TaskModelDAL, UserModelDAL
 from flask_login import LoginManager, login_required, current_user, login_user, logout_user
 from database.Models import UserModel
-from forms import LoginForm, TaskForm
+from forms import LoginForm, TaskForm, RegisterForm
+import time
 
 def create_app() -> Flask:
     app = Flask(__name__)
@@ -21,41 +22,27 @@ def connect_to_database(app) -> None:
     with app.app_context():
         db.create_all()
 
+
 app = create_app()
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+
 @login_manager.user_loader
 def load_user(id):
     return UserModel.UserModel.query.get(id)
+
 
 @app.route("/")
 def home():
     return render_template("home.html")
 
 
-@app.route('/admin/')
 @login_required
-def admin():
-    return {
-        "API":"admin"
-    }
-
-
-@login_required
-@app.route('/tasks', methods=['GET'])
+@app.route('/tasks/', methods=['GET'])
 def get_tasks() -> dict:
     tasks = TaskModelDAL.get_user_tasks(current_user.id)
-    ans = {'Tasks':[]}
-    for each in tasks:
-        ans['Tasks'].append({
-            "id": each.id,
-            "user_id": each.user_id,
-            "title": each.title,
-            "description": each.description,
-            "completed": each.completed,
-        })
-    return ans
+    return render_template("tasks.html", tasks=tasks)
 
 
 @login_required
@@ -67,24 +54,25 @@ def create_tasks():
             new_task = TaskModelDAL.create_task(
                 title=request.form.get('title'),
                 description=request.form.get('description'),
-                user_id=current_user.id
+                user_id=current_user.id,
+                expired_at=request.form.get('entrydate')
             )
-            return {
-                "Success":f"{new_task.title} task added!"
-            }
+            return redirect(url_for("get_tasks"))
     return render_template("create_task.html", form=form)
 
 
-@app.route('/users', methods=['GET'])
-def get_users() -> dict:
-    users = UserModelDAL.get_all_users()
-    ans = {'Users':[]}
-    for each in users:
-        ans['Users'].append({
-            "id": each.id,
-            "name": each.name
-        })
-    return ans
+@login_required
+@app.route('/delete_task/<id>', methods=['GET', 'POST'])
+def delete_task(id):
+    TaskModelDAL.delete_task(id=id)
+    return redirect(url_for("get_tasks"))
+
+
+@login_required
+@app.route('/complete_task/<id>', methods=['GET', 'POST'])
+def complete_task(id):
+    TaskModelDAL.complete_task(id=id)
+    return redirect(url_for("get_tasks"))
 
 
 @app.route("/login/", methods=["GET", "POST"])
@@ -96,21 +84,24 @@ def login():
             if user and UserModelDAL.check_password(user.id, request.form.get("password")):
                 login_user(user, remember=form.remember.data)
                 return redirect(url_for("home"))
-            flash("Invalid username/password", 'error')
+            flash("Invalid username or password, try again!", 'error')
     return render_template("login.html", form=form)
 
 
-@app.route('/register', methods=["GET", "POST"])
+@app.route('/register/', methods=["GET", "POST"])
 def register():
+    form = RegisterForm()
     if request.method == "POST":
-        user = UserModelDAL.create_user(name=request.form.get("username"),
-                    email=request.form.get("email"),
-                    password=request.form.get("password"))
-        return redirect(url_for("login"))
-    return render_template("sign_up.html")
+        if form.validate_on_submit():
+            user = UserModelDAL.create_user(name=request.form.get("name"),
+                        email=request.form.get("email"),
+                        password=request.form.get("password"))
+            flash(message="Account created!", category="success")
+            return redirect(url_for("login"))
+    return render_template("sign_up.html", form=form)
 
 
-@app.route("/logout")
+@app.route("/logout/")
 def logout():
     logout_user()
     return redirect(url_for("home"))

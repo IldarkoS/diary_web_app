@@ -5,9 +5,9 @@ from flask_login import (LoginManager, UserMixin, login_required, login_user, cu
 from main import login_manager
 
 
-@login_manager.user_loader
-def load_user(user_id):
-    return db.session.query(UserModel).get(id=user_id)
+# @login_manager.user_loader
+# def load_user(user_id):
+#     return db.session.query(UserModel).get(id=user_id)
 
 class UserModel(db.Model, UserMixin):
     __tablename__ = 'users'

@@ -13,9 +13,6 @@
     </style>
   </head>
   <body>
-    {% if current_user.is_authenticated %}
-	<a href="/logout">Logout</a>
-	{% endif %}
     <form action="" method="post">
         {{ form.csrf_token }}
         <p>
@@ -37,9 +34,21 @@
             {% endif %}
         </p>
         <p>
+          {{ form.entrydate.label() }}
+          {{ form.entrydate() }}
+          {% if form.entrydate.errors %}
+          {% for error in form.entrydate.errors %}
+              {{ error }}
+          {% endfor %}
+          {% endif %}
+      </p>
+        <p>
             {{ form.submit() }}
         </p>
         </form>
-        
+        <a href="/tasks">My tasks list</a><br>
+        {% if current_user.is_authenticated %}
+        <a href="/logout">Logout</a>
+        {% endif %}
   </body>
 </html>

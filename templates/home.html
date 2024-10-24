@@ -12,17 +12,19 @@
 	</style>
 </head>
 <body>
-	<nav>
-	<ul>
-		<li><a href="/login">Login</a></li>
-		<li><a href="/register">Create account</a></li>
-	</ul>
-	</nav>
 	{% if current_user.is_authenticated %}
 	<h1>You are logged in</h1>
+    <a href="/create_task">Create new task</a><br>
+	<a href="/tasks">My tasks list</a><br>
 	<a href="/logout">Logout</a>
 	{% else %}
 	<h1>You are not logged in</h1>
+	<nav>
+		<ul>
+			<li><a href="/login">Login</a></li>
+			<li><a href="/register">Create account</a></li>
+		</ul>
+	</nav>
 	{% endif %}
 </body>
 </html>
