@@ -37,3 +37,20 @@ services:
     ports:
       - '5050:80'
       
+  react:
+    container_name: react-app
+    image: node:alpine
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - './frontend:/src/'
+      - '/frontend/node_modules'
+      # - .:/app/frontend
+    ports:
+      - 5173:5173
+    depends_on:
+      - "app"
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true

@@ -12,6 +12,7 @@ APP_SECRET_KEY = str(os.getenv('APP_SECRET_KEY'))
 
 
 PSQLURL = f"postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}/{DATABASE_NAME}"
+print(PSQLURL)
 
 
 # class Config:
