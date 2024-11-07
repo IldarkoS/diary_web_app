@@ -1,32 +1,136 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Task List</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Task List</h1>
-    <ul>{% if tasks %}
-        {% for task in tasks %}
-            <li>Title: {{ task.title }} <br>
-                Description: {{ task.description }} <br>
-                Completed: {{ task.completed }} <br>
-                Created at: {{ task.created_at }} <br>
-                Expired at: {{ task.expired_at }} <br>
-                <form action="/complete_task/{{ task.id }}">
-                    <input type="submit" value="Complete this task" />
+
+    <div class="top-bar">
+        <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+    </div>
+
+    <div class="tasks-container">
+        <div class="task-list">
+            <h2>Your Tasks</h2>
+            <div class="task-section">
+                <h3>Incomplete Tasks</h3>
+                <ul>
+                    {% for task in tasks if not task.completed %}
+                        <li>
+                            <a href="{{ url_for('view_task', id=task.id) }}" class="task-link">
+                                {{ task.title }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        
+            <div class="task-section">
+                <h3>Completed Tasks</h3>
+                <ul>
+                    {% for task in tasks if task.completed %}
+                        <li>
+                            <a href="{{ url_for('view_task', id=task.id) }}" class="task-link completed-task">
+                                {{ task.title }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="add-task-container">
+            <form action="/view_task/create_task" method=get>
+                <input type="submit" class="add-task-button" value="Create new task" />
+            </form>
+        </div>
+        </div>
+
+        <div class="task-details">
+            {% if task %}
+                <div id="task-info-view">
+                    <div class="task-info">
+                        <div class="task-field">
+                            <strong>Title:</strong>
+                            <p>{{ task.title }}</p>
+                        </div>
+                        <div class="task-field">
+                            <strong>Description:</strong>
+                            <p>{{ task.description }}</p>
+                        </div>
+                        <div class="task-field">
+                            <strong>Completed:</strong>
+                            <p>{{ 'Yes' if task.completed else 'No' }}</p>
+                        </div>
+                        <div class="task-field">
+                            <strong>Created at:</strong>
+                            <p>{{ task.created_at.strftime('%d-%m-%Y')  }}</p>
+                        </div>
+                        <div class="task-field">
+                            <label>Expired at:</label>
+                            <span>{{ task.expired_at.strftime('%d-%m-%Y') }}</span>
+                        </div>
+                    
+                    <button class="complete-button" onclick="document.location='/complete_task/{{ task.id }}'">{{ 'Uncomplete this task' if task.completed else 'Complete this task' }}</button>
+                    <button class="button" onclick="toggleEditMode()">Edit</button>
+                    <button class="delete-button" onclick="document.location='/delete_task/{{ task.id }}'">Delete this task</button>
+                </div>
+                </div>
+                
+                <!-- <h3>Edit Task</h3> -->
+                <form id="task-edit-form" action="{{ url_for('view_task', id=task.id) }}" method="post" style="display: none;">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-group">
+                        {{ form.title.label(class="form-label") }}
+                        {{ form.title(class="form-control", placeholder="Task Title") }}
+                    </div>
+            
+                    <div class="form-group">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control", placeholder="Task Description") }}
+                    </div>
+            
+                    <div class="form-group">
+                        {{ form.completed.label(class="form-label") }}
+                        {{ form.completed() }}
+                    </div>
+            
+                    <div class="form-group">
+                        {{ form.expired_at.label(class="form-label") }}
+                        {{ form.expired_at(class="form-control", placeholder="Expiration Date") }}
+                    </div>
+                    <button type="submit" class="save-button">Save</button>
+                    <button type="button" class="cancel-button" onclick="toggleEditMode()">Cancel</button>
+                
                 </form>
-                <form action="/delete_task/{{ task.id }}" method=post>
-                    <input type="submit" value="Delete this task" />
-                </form>
-            </li>
-        {% endfor %}
-        {% else %}
-        Task list empty!
-        {% endif %}
-    </ul>
-    {% if current_user.is_authenticated %}
-    <a href="/create_task">Create new task</a><br>
-	<a href="/logout">Logout</a>
-	{% endif %}
+                
+                
+            {% else %}
+                <p>Select a task to see details and edit it.</p>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <script>
+        // Переключение между режимами редактирования и просмотра задачи
+        function toggleEditMode() {
+            const infoView = document.getElementById('task-info-view');
+            const editForm = document.getElementById('task-edit-form');
+        
+            
+            // Переключаем видимость информации и формы редактирования
+            if (infoView.style.display === "none") {
+                infoView.style.display = "block";
+                editForm.style.display = "none";
+            } else {
+                infoView.style.display = "none";
+                editForm.style.display = "block";
+            }
+        }
+    </script>
+    
 </body>
 </html>

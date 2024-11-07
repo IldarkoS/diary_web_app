@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>Creating task</title>
     <style>
       h1 {
@@ -13,42 +14,43 @@
     </style>
   </head>
   <body>
-    <form action="" method="post">
-        {{ form.csrf_token }}
-        <p>
-            {{ form.title.label() }}
-            {{ form.title() }}
-            {% if form.title.errors %}
-            {% for error in form.title.errors %}
-                {{ error }}
-            {% endfor %}
-            {% endif %}
-        </p>
-        <p>
-            {{ form.description.label() }}
-            {{ form.description() }}
-            {% if form.description.errors %}
-            {% for error in form.description.errors %}
-                {{ error }}
-            {% endfor %}
-            {% endif %}
-        </p>
-        <p>
-          {{ form.entrydate.label() }}
-          {{ form.entrydate() }}
-          {% if form.entrydate.errors %}
-          {% for error in form.entrydate.errors %}
-              {{ error }}
-          {% endfor %}
-          {% endif %}
-      </p>
-        <p>
-            {{ form.submit() }}
-        </p>
+
+    <div class="tasks-container">
+      <div class="task-creating">
+        <form id="new-task-form" action="{{ url_for('create_tasks') }}" method="post">
+          {{ new_task_form.hidden_tag() }}
+          {{ new_task_form.csrf_token }}
+          <div class="form-group">
+              {{ new_task_form.title.label(class="form-label") }}
+              {{ new_task_form.title(class="form-control", placeholder="Task Title") }}
+              {% if new_task_form.title.errors %}
+              {% for error in new_task_form.title.errors %}
+              <span class="error-message">{{error}}</span>
+              {% endfor %}
+              {% endif %}
+          </div>
+          <div class="form-group">
+              {{ new_task_form.description.label(class="form-label") }}
+              {{ new_task_form.description(class="form-control", placeholder="Task Description") }}
+              {% if new_task_form.description.errors %}
+              {% for error in new_task_form.description.errors %}
+              <span class="error-message">{{error}}</span>
+              {% endfor %}
+              {% endif %}
+          </div>
+          <div class="form-group">
+              {{ new_task_form.entrydate.label(class="form-label") }}
+              {{ new_task_form.entrydate(class="form-control", placeholder="Expiration Date") }}
+              {% if new_task_form.entrydate.errors %}
+              {% for error in new_task_form.entrydate.errors %}
+              <span class="error-message">{{error}}</span>
+              {% endfor %}
+              {% endif %}
+          </div>
+          <button type="submit" class="button">Add Task</button>
+          <input type="button" class="button" onclick="location.href='/view_task/';" value="Cancel" />
         </form>
-        <a href="/tasks">My tasks list</a><br>
-        {% if current_user.is_authenticated %}
-        <a href="/logout">Logout</a>
-        {% endif %}
+      </div>
+    </div>
   </body>
 </html>

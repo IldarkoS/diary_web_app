@@ -15,7 +15,7 @@ class LoginForm(FlaskForm):
 class TaskForm(FlaskForm):
     title = StringField("Title:", validators=[DataRequired()])
     description = StringField("Description: ", validators=[DataRequired()])
-    entrydate = DateField('Expire Date: ', format='%Y-%m-%d' )
+    entrydate = DateField('Expire Date: ', format='%Y-%m-%d', validators=[DataRequired()])
     submit = SubmitField()
 
     def validate_entrydate(form, field):
@@ -28,3 +28,15 @@ class RegisterForm(FlaskForm):
     email = StringField("E-mail: ", validators=[Email()])
     password = StringField("Password: ", validators=[DataRequired()])
     submit = SubmitField()
+
+
+class ViewTaskForm(FlaskForm):
+    title = StringField("Title: ", validators=[DataRequired()])
+    description = StringField("Description: ", validators=[DataRequired()])
+    expired_at = DateField('Expire Date: ', format='%Y-%m-%d' )
+    completed = BooleanField("Compeleted: ")
+    submit = SubmitField()
+
+    def validate_entrydate(form, field):
+        if field.data < datetime.datetime.now().date():
+            raise ValidationError("Expired date must not be early than now!")

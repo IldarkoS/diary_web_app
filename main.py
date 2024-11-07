@@ -4,8 +4,10 @@ from extensions import db
 from database.DAL import TaskModelDAL, UserModelDAL
 from flask_login import LoginManager, login_required, current_user, login_user, logout_user
 from database.Models import UserModel
-from forms import LoginForm, TaskForm, RegisterForm
+from forms import LoginForm, TaskForm, RegisterForm, ViewTaskForm
+from flask_cors import CORS
 import time
+
 
 def create_app() -> Flask:
     app = Flask(__name__)
@@ -26,6 +28,7 @@ def connect_to_database(app) -> None:
 app = create_app()
 login_manager = LoginManager()
 login_manager.init_app(app)
+# cors = CORS(app)
 
 
 @login_manager.user_loader
@@ -39,15 +42,18 @@ def home():
 
 
 @login_required
-@app.route('/tasks/', methods=['GET'])
+@app.route('/view_task/', methods=['GET'])
 def get_tasks() -> dict:
     tasks = TaskModelDAL.get_user_tasks(current_user.id)
-    return render_template("tasks.html", tasks=tasks)
+    form = TaskForm()
+    new_task_form = TaskForm()
+    return render_template("tasks.html", form=form, tasks=tasks, new_task_form=new_task_form)
 
 
 @login_required
-@app.route('/create_task/', methods=['GET', 'POST'])
+@app.route('/view_task/create_task/', methods=['GET', 'POST'])
 def create_tasks():
+    tasks = TaskModelDAL.get_user_tasks(current_user.id)
     form = TaskForm()
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -55,10 +61,28 @@ def create_tasks():
                 title=request.form.get('title'),
                 description=request.form.get('description'),
                 user_id=current_user.id,
-                expired_at=request.form.get('entrydate')
+                expired_at=request.form.get('expired_at')
             )
             return redirect(url_for("get_tasks"))
-    return render_template("create_task.html", form=form)
+    return render_template("create_task.html", new_task_form=form)
+
+
+@login_required
+@app.route('/view_task/<id>', methods=['GET', "POST"])
+def view_task(id):
+    task = TaskModelDAL.view_task(id)
+    tasks = TaskModelDAL.get_user_tasks(current_user.id)
+    form = ViewTaskForm(obj=task)
+    new_taks_form = TaskForm()
+    if request.method == "POST":
+        if form.validate_on_submit():
+            title = request.form.get("title")
+            description = request.form.get("description")
+            completed = True if request.form.get("completed") == 'y' else False
+            expired_at = request.form.get("expired_at")
+            task = TaskModelDAL.edit_task(task.id, title, description, expired_at, completed)
+            return render_template("tasks.html", task=task, form=form, tasks=tasks, new_task_form=new_taks_form)
+    return render_template("tasks.html", task=task, form=form, tasks=tasks, new_task_form=new_taks_form)
 
 
 @login_required
@@ -83,7 +107,7 @@ def login():
             user = UserModelDAL.get_user_by_email(request.form.get("email"))
             if user and UserModelDAL.check_password(user.id, request.form.get("password")):
                 login_user(user, remember=form.remember.data)
-                return redirect(url_for("home"))
+                return redirect(url_for("get_tasks"))
             flash("Invalid username or password, try again!", 'error')
     return render_template("login.html", form=form)
 

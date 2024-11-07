@@ -24,3 +24,17 @@ def complete_task(id):
 def get_user_tasks(id) -> list:
     tasks = TaskModel.query.filter(TaskModel.user_id == id).all()
     return tasks
+
+
+def view_task(id) -> TaskModel():
+    task = TaskModel.query.filter(TaskModel.id == id).first()
+    return task
+
+def edit_task(id, title, description, expired_at, completed):
+    task = TaskModel.query.filter(TaskModel.id == id).first()
+    task.title = title
+    task.description = description
+    task.expired_at = expired_at
+    task.completed = completed
+    db.session.commit()
+    return task
