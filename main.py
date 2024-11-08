@@ -51,7 +51,7 @@ def get_tasks() -> dict:
 
 
 @login_required
-@app.route('/view_task/create_task/', methods=['GET', 'POST'])
+@app.route('/create_task/', methods=['GET', 'POST'])
 def create_tasks():
     tasks = TaskModelDAL.get_user_tasks(current_user.id)
     form = TaskForm()
