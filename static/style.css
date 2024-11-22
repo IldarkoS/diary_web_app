@@ -190,6 +190,7 @@ body {
     font-weight: bold;
     border-radius: 5px;
     transition: background-color 0.3s ease;
+    margin-right: 10px;
 }
 
 .logout-button:hover {
@@ -260,7 +261,6 @@ body {
     background-color: #2869ae;
 }
 
-/* Стили для полей ввода при редактировании */
 .task-input {
     font-size: 16px;
     color: #333;
@@ -276,7 +276,6 @@ textarea.task-input {
     min-height: 100px;
 }
 
-/* Стили для кнопок сохранения и отмены */
 .save-button {
     background-color: #007bff;
     color: white;
@@ -310,7 +309,6 @@ textarea.task-input {
     background-color: #d32f2f;
 }
 
-/* Стили для панели задач */
 .task-section {
     margin-bottom: 20px;
 }
@@ -380,4 +378,153 @@ textarea.task-input {
     margin-top: auto; 
     padding-top: 10px; 
     border-top: 1px solid #ddd;
+}
+
+.task-list {
+    width: 30%;
+    padding: 20px;
+    border-right: 1px solid #ddd;
+    background-color: #f9f9f9;
+}
+
+.task-details {
+    width: 70%;
+    padding: 20px;
+}
+
+.task-section li {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.task-section li:hover {
+    background-color: #f0f0f0;
+}
+
+.completed-task {
+    color: #00c04d;
+    font-weight: bold;
+}
+
+.back-plans-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    margin-right: 10px;
+}
+
+.back-plans-button:hover {
+    background-color: #0056b3;
+}
+
+.task-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    cursor: grab;
+}
+
+.task-item:active {
+    cursor: grabbing;
+    background-color: #f0f0f0;
+}
+
+.task-item:hover {
+    background-color: #e6e6e6;
+}
+
+.dragging {
+    opacity: 0.7;
+    background-color: #e3f2fd;
+    border: 2px dashed #2196f3;
+    transform: scale(1.05);
+    transition: transform 0.2s ease-in-out;
+}
+
+.drag-over-above {
+    position: relative;
+}
+
+.drag-over-above::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: #4caf50;
+    border-radius: 2px;
+}
+
+.drag-over-below {
+    position: relative;
+}
+
+.drag-over-below::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: #4caf50;
+    border-radius: 2px;
+}
+
+.task-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    transition: all 0.2s ease-in-out;
+    cursor: grab;
+}
+
+.task-item:hover {
+    background-color: #f1f1f1;
+}
+
+.task-item:active {
+    cursor: grabbing;
+    transform: scale(1.02);
+}
+
+.progress-bar {
+    background-color: #e8e8e8;
+    border-radius: 5px;
+    height: 10px;
+    margin: 5px 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress {
+    background-color: #4caf50;
+    height: 100%;
+    transition: width 0.4s ease;
+}
+
+.progress-bar-large {
+    background-color: #e8e8e8;
+    border-radius: 8px;
+    height: 20px;
+    margin: 10px 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar-large .progress {
+    background-color: #4caf50;
+    height: 100%;
+    transition: width 0.4s ease;
 }

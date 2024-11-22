@@ -1,10 +1,10 @@
 import config
 from flask import Flask, request, render_template, url_for, redirect, flash, make_response
 from extensions import db
-from database.DAL import TaskModelDAL, UserModelDAL
+from database.DAL import TaskModelDAL, UserModelDAL, PlanModelDAL
 from flask_login import LoginManager, login_required, current_user, login_user, logout_user
 from database.Models import UserModel
-from forms import LoginForm, TaskForm, RegisterForm, ViewTaskForm
+from forms import LoginForm, TaskForm, RegisterForm, ViewTaskForm, PlanForm, TaskWithPlanForm
 from flask_cors import CORS
 import time
 
@@ -97,6 +97,79 @@ def delete_task(id):
 def complete_task(id):
     TaskModelDAL.complete_task(id=id)
     return redirect(url_for("get_tasks"))
+
+
+@app.route('/plans/', methods=['GET'])
+@login_required
+def view_plans():
+    plans = PlanModelDAL.get_plans_by_user(current_user.id)
+    return render_template("plans.html", plans=plans)
+
+
+@app.route('/plans/create/', methods=['GET', 'POST'])
+@login_required
+def create_plan():
+    form = PlanForm()
+    if form.validate_on_submit():
+        PlanModelDAL.create_plan(
+            user_id=current_user.id,
+            title=form.title.data,
+            description=form.description.data,
+            expired_at=form.expired_at.data
+        )
+        return redirect(url_for('view_plans'))
+    return render_template("create_plan.html", form=form)
+
+
+@app.route('/plan/<int:plan_id>', methods=['GET', 'POST'])
+@login_required
+def view_plan(plan_id):
+    plan = PlanModelDAL.get_plan_by_id(plan_id)
+    tasks = TaskModelDAL.get_tasks_by_plan(plan_id=plan_id)
+    form = TaskWithPlanForm()
+    if form.validate_on_submit():
+        new_task = TaskModelDAL.create_task(
+            title=form.title.data,
+            description=form.description.data,
+            expired_at=plan.expired_at,
+            plan_id=plan_id,
+            user_id=current_user.id
+        )
+        return redirect(url_for('view_plan', plan_id=plan_id))
+    return render_template("view_plan.html", plan=plan, tasks=tasks, form=form)
+
+
+@login_required
+@app.route('/delete_task_in_plan/<plan_id>/<id>', methods=['GET', 'POST'])
+def delete_task_in_plan(plan_id, id):
+    TaskModelDAL.delete_task(id=id)
+    return redirect(f"/plan/{plan_id}")
+
+
+@login_required
+@app.route('/complete_task_in_plan/<plan_id>/<id>', methods=['GET', 'POST'])
+def complete_task_in_plan(plan_id, id):
+    TaskModelDAL.complete_task(id=id)
+    return redirect(f"/plan/{plan_id}")
+
+
+@login_required
+@app.route('/delete_plan/<plan_id>', methods=['GET', 'POST'])
+def delete_plan(plan_id):
+    PlanModelDAL.delete_plan(plan_id=plan_id)
+    return redirect(url_for("view_plans"))
+
+
+@app.route('/plan/<int:plan_id>/update_order', methods=['POST'])
+@login_required
+def update_task_order(plan_id):
+    data = request.json  # Получаем JSON-данные с новым порядком задач
+    for index, task_id in enumerate(data.get("task_ids", [])):
+        task = TaskModelDAL.view_task(task_id)
+        if task and task.plan_id == plan_id:
+            task.order = index
+    db.session.commit()
+    return {"message": "Order updated successfully"}
 
 
 @app.route("/login/", methods=["GET", "POST"])

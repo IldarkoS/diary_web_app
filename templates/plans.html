@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plans</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="top-bar">
+        <a href="{{ url_for('get_tasks') }}" class="back-plans-button">Back to Tasks</a>
+        <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+    </div>
+
+    <div class="tasks-container">
+        <div class="task-list">
+            <h2>Your Plans</h2>
+            <ul>
+                <div class="task-section">
+                {% for plan in plans %}
+                <li>
+                    <a href="{{ url_for('view_plan', plan_id=plan.id) }}" class="task-link">
+                        {{ plan.title }}
+                    </a>
+                    </a> - {{ plan.tasks|length }} Tasks <br>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: {{ plan.progress() }}%;"></div>
+                    </div>
+                    <small>{{ plan.progress() }}% complete</small>
+                    <button class="delete-button" onclick="document.location='/delete_plan/{{ plan.id }}'">Delete this plan</button>
+                </li>
+                {% endfor %}
+            </div>
+            </ul>
+            <div class="add-task-container">
+                <form action="{{ url_for('create_plan') }}" method="get">
+                    <input type="submit" class="add-task-button" value="Create New Plan" />
+                </form>
+            </div>
+        </div>
+
+        <div class="task-details">
+            {% if selected_plan %}
+                <h2>{{ selected_plan.title }}</h2>
+                <p>{{ selected_plan.description }}</p>
+                <hr>
+                <h3>Tasks in this Plan</h3>
+                <ul>
+                    {% for task in tasks %}
+                    <li>
+                        {{ task.title }} - 
+                        {% if task.completed %}Completed{% else %}Incomplete{% endif %}
+                        <a href="{{ url_for('complete_task', id=task.id) }}" class="task-link">Toggle Complete</a>
+                        <a href="{{ url_for('delete_task', id=task.id) }}" class="task-link completed-task">Delete</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                <h3>Add New Task</h3>
+                <form method="POST" action="{{ url_for('view_plan', plan_id=selected_plan.id) }}">
+                    {{ form.hidden_tag() }}
+                    <div class="form-group">
+                        {{ form.title.label(class="form-label") }}
+                        {{ form.title(class="form-control", placeholder="Task Title") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control", placeholder="Task Description") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.expired_at.label(class="form-label") }}
+                        {{ form.expired_at(class="form-control", placeholder="Expiration Date") }}
+                    </div>
+                    <button type="submit" class="button">Add Task</button>
+                </form>
+            {% else %}
+                <h2>Select a Plan to View Details</h2>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

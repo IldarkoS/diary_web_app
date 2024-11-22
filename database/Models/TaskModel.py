@@ -14,7 +14,10 @@ class TaskModel(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.datetime.now())
     expired_at = db.Column(db.DateTime, default=datetime.datetime.now())
 
-
+    # Для планов
+    plan_id = db.Column(db.Integer, db.ForeignKey('plans.id'), nullable=True)
+    order = db.Column(db.Integer, nullable=True, default=0)
+    
     @validates
     def validate_title(self, key, title):
         if not title:

@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import Form, ValidationError
-from wtforms import StringField, SubmitField, BooleanField
+from typing import Optional
+from wtforms import StringField, SubmitField, BooleanField, SelectField
 from wtforms.validators import DataRequired, Email
 from wtforms.fields import DateField
 import datetime
@@ -40,3 +41,16 @@ class ViewTaskForm(FlaskForm):
     def validate_entrydate(form, field):
         if field.data < datetime.datetime.now().date():
             raise ValidationError("Expired date must not be early than now!")
+
+
+class PlanForm(FlaskForm):
+    title = StringField("Plan Title:", validators=[DataRequired()])
+    description = StringField("Description:")
+    expired_at = DateField('Expire Date: ', format='%Y-%m-%d' )
+    submit = SubmitField()
+
+
+class TaskWithPlanForm(FlaskForm):
+    title = StringField("Title:", validators=[DataRequired()])
+    description = StringField("Description: ", validators=[DataRequired()])
+    submit = SubmitField()

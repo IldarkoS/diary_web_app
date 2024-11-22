@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Plan</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="top-bar">
+        <a href="{{ url_for('view_plans') }}" class="back-plans-button">Back to Plans</a>
+        <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+    </div>
+
+    <div class="tasks-container">
+        <div class="task-list">
+            <h2>{{ plan.title }}</h2>
+            <p>{{ plan.description }}</p>
+            <div class="progress-bar-large">
+                <div class="progress" style="width: {{ plan.progress() }}%;"></div>
+            </div>
+            <p><strong>{{ plan.progress() }}% complete</strong></p>
+            <p><strong>Created:</strong> {{ plan.created_at.strftime('%d-%m-%Y') }}</p>
+            <p><strong>Expires:</strong> {{ plan.expired_at.strftime('%d-%m-%Y') }}</p>
+            <p><strong>Number of Tasks:</strong> {{ tasks|length }}</p>
+        </div>
+
+        <div class="task-details">
+            <h3>Tasks in this Plan</h3>
+            <ul class="task-section" id="task-list">
+                {% for task in tasks %}
+                <li class="task-item" data-task-id="{{ task.id }}" draggable="true">
+                    <div>
+                        <strong>{{ task.title }}</strong> - 
+                        {% if task.completed %}
+                        <span class="completed-task">Completed</span>
+                        {% else %}
+                        <span>Incomplete</span>
+                        {% endif %}
+                    </div>
+                    <p>{{ task.description }}</p>
+                    <button class="complete-button" onclick="location.href='{{ url_for('complete_task_in_plan', plan_id=plan.id, id=task.id) }}'">
+                        {{ 'Mark Incomplete' if task.completed else 'Mark Complete' }}
+                    </button>
+                    <button class="delete-button" onclick="location.href='{{ url_for('delete_task_in_plan', plan_id=plan.id, id=task.id) }}'">Delete</button>
+                    
+                </li>
+                {% endfor %}
+            </ul>
+
+            <h3>Add New Task</h3>
+            <form method="POST" action="{{ url_for('view_plan', plan_id=plan.id) }}">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    {{ form.title.label(class="form-label") }}
+                    {{ form.title(class="form-control", placeholder="Task Title") }}
+                </div>
+                <div class="form-group">
+                    {{ form.description.label(class="form-label") }}
+                    {{ form.description(class="form-control", placeholder="Task Description") }}
+                </div>
+                <button type="submit" class="button">Add Task</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const taskList = document.getElementById('task-list');
+
+        if (!taskList) {
+            console.error('Element with ID "task-list" not found');
+            return;
+        }
+
+        let draggedItem = null;
+
+        taskList.addEventListener('dragstart', (e) => {
+            if (e.target && e.target.classList.contains('task-item')) {
+                draggedItem = e.target;
+                e.target.classList.add('dragging');
+            }
+        });
+
+        taskList.addEventListener('dragend', (e) => {
+            if (e.target && e.target.classList.contains('task-item')) {
+                e.target.classList.remove('dragging');
+                draggedItem = null;
+            }
+        });
+
+        taskList.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const target = e.target.closest('.task-item'); // Найти ближайший элемент с классом task-item
+            if (target && target !== draggedItem) {
+                const bounding = target.getBoundingClientRect();
+                const offset = e.clientY - bounding.top;
+                const middle = bounding.height / 2;
+
+                // Добавляем визуальные классы для "выше" или "ниже"
+                target.classList.remove('drag-over-above', 'drag-over-below');
+                if (offset > middle) {
+                    target.classList.add('drag-over-below');
+                } else {
+                    target.classList.add('drag-over-above');
+                }
+            }
+        });
+
+        taskList.addEventListener('dragleave', (e) => {
+            if (e.target && e.target.classList.contains('task-item')) {
+                e.target.classList.remove('drag-over-above', 'drag-over-below');
+            }
+        });
+
+        taskList.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const target = e.target.closest('.task-item');
+            if (target && draggedItem) {
+                const bounding = target.getBoundingClientRect();
+                const offset = e.clientY - bounding.top;
+                const middle = bounding.height / 2;
+
+                if (offset > middle) {
+                    taskList.insertBefore(draggedItem, target.nextSibling);
+                } else {
+                    taskList.insertBefore(draggedItem, target);
+                }
+            }
+
+            // Снимаем все классы выделения
+            Array.from(taskList.children).forEach(item =>
+                item.classList.remove('drag-over-above', 'drag-over-below')
+            );
+
+            saveTaskOrder();
+        });
+
+        function saveTaskOrder() {
+            const taskIds = Array.from(taskList.children).map(item => item.dataset.taskId);
+
+            fetch(`/plan/{{ plan.id }}/update_order`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ task_ids: taskIds }),
+            }).then(response => {
+                if (!response.ok) {
+                    alert('Failed to save task order');
+                }
+            });
+        }
+    });
+</script>
